@@ -3,14 +3,16 @@
 
 #include "dtype.h"
 
-typedef struct {
+typedef struct
+{
     int rows;
     int cols;
     DataType dtype;
-    void* data;
+    void *data;
 } Matrix;
 
-Matrix* createMatrix(int rows, int cols, DataType dtype);
-void freeMatrix(Matrix* m);
+Matrix *createMatrix(int rows, int cols, DataType dtype);
+Matrix *matrixTranspose(const Matrix *m);
+void freeMatrix(Matrix *m);
 
 #endif
