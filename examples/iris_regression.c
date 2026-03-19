@@ -5,7 +5,7 @@
 #include "../calculations/metrics.h"
 #include "../calculations/preprocessing.h"
 #include "../calculations/costFunction.h"
-#include "../al/linearRegression.h"
+#include "../al/linearAl.h"
 #include "../loader/dataloader.h"
 
 int main() {
@@ -50,16 +50,16 @@ int main() {
     float lambda = 0.001f; // Regularization strength
     printf("Training Linear Regression with L2 Regularization (LR = %.2f, Iterations = %d, Lambda = %.4f)...\n", 
            learning_rate, iterations, lambda);
-    LinearRegression* model = createLinearRegression(n_features, learning_rate, iterations, REG_L2, lambda, 0.0f);
+    LinearRegressor* model = createLinearRegressor(n_features, learning_rate, iterations, REG_L2, lambda, 0.0f);
     
-    Matrix* y_pred_initial = predictLinearRegression(model, X);
+    Matrix* y_pred_initial = predictLinearRegressor(model, X);
     float initial_cost = computeCost(COST_MSE, y, y_pred_initial);
     printf("Initial Cost (MSE): %.6f\n", initial_cost);
     freeMatrix(y_pred_initial);
 
-    trainLinearRegression(model, X, y);
+    trainLinearRegressor(model, X, y);
 
-    Matrix* y_pred_final = predictLinearRegression(model, X);
+    Matrix* y_pred_final = predictLinearRegressor(model, X);
     float final_cost = computeCost(COST_MSE, y, y_pred_final);
     printf("Final Cost (MSE):   %.6f\n\n", final_cost);
 
@@ -119,7 +119,7 @@ int main() {
     freeMatrix(X);
     freeMatrix(y);
     freeMatrix(y_pred);
-    freeLinearRegression(model);
+    freeLinearRegressor(model);
 
     return 0;
 }
