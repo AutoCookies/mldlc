@@ -92,3 +92,50 @@ void train_test_split(const Matrix* X, const Matrix* y, float test_size, int shu
 
     free(indices);
 }
+
+KFoldSplit* get_k_fold_indices(int n_samples, int k, int fold_idx, int shuffle, int random_state) {
+    if (fold_idx < 0 || fold_idx >= k) return NULL;
+
+    KFoldSplit* split = (KFoldSplit*)malloc(sizeof(KFoldSplit));
+    int* indices = (int*)malloc(n_samples * sizeof(int));
+    for (int i = 0; i < n_samples; i++) indices[i] = i;
+
+    if (shuffle) {
+        srand(random_state);
+        for (int i = n_samples - 1; i > 0; i--) {
+            int j = rand() % (i + 1);
+            int temp = indices[i];
+            indices[i] = indices[j];
+            indices[j] = temp;
+        }
+    }
+
+    int fold_size = n_samples / k;
+    int val_start = fold_idx * fold_size;
+    int val_end = (fold_idx == k - 1) ? n_samples : (fold_idx + 1) * fold_size;
+    
+    split->val_count = val_end - val_start;
+    split->train_count = n_samples - split->val_count;
+    split->val_indices = (int*)malloc(split->val_count * sizeof(int));
+    split->train_indices = (int*)malloc(split->train_count * sizeof(int));
+
+    int val_ptr = 0, train_ptr = 0;
+    for (int i = 0; i < n_samples; i++) {
+        if (i >= val_start && i < val_end) {
+            split->val_indices[val_ptr++] = indices[i];
+        } else {
+            split->train_indices[train_ptr++] = indices[i];
+        }
+    }
+
+    free(indices);
+    return split;
+}
+
+void free_k_fold_split(KFoldSplit* split) {
+    if (split) {
+        free(split->train_indices);
+        free(split->val_indices);
+        free(split);
+    }
+}
