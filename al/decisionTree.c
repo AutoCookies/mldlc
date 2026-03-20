@@ -4,12 +4,13 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include "palloc.h"
 
 DecisionTree* createDecisionTree(TreeType type, SplitCriterion criterion, 
                                  int max_depth, int min_samples_split, 
                                  int min_samples_leaf, int max_features,
                                  float min_impurity_decrease, int random_state) {
-    DecisionTree* tree = (DecisionTree*)malloc(sizeof(DecisionTree));
+    DecisionTree* tree = (DecisionTree*)pa_malloc(sizeof(DecisionTree));
     if (tree == NULL) return NULL;
     tree->root = NULL;
     tree->type = type;
@@ -27,13 +28,13 @@ static void freeNode(DecisionNode* node) {
     if (node == NULL) return;
     freeNode(node->left);
     freeNode(node->right);
-    free(node);
+    pa_free(node);
 }
 
 void freeDecisionTree(DecisionTree* tree) {
     if (tree == NULL) return;
     freeNode(tree->root);
-    free(tree);
+    pa_free(tree);
 }
 
 // Internal structure for data subset
@@ -61,7 +62,7 @@ static float calculateNodeValue(const DecisionTree* tree, const Matrix* y, Subse
                 max_class = (int)y_data[subset->indices[i]];
         }
         
-        int* counts = (int*)calloc(max_class + 1, sizeof(int));
+        int* counts = (int*)pa_calloc(max_class + 1, sizeof(int));
         for (int i = 0; i < subset->count; i++) {
             counts[(int)y_data[subset->indices[i]]]++;
         }
@@ -74,7 +75,7 @@ static float calculateNodeValue(const DecisionTree* tree, const Matrix* y, Subse
                 best_class = i;
             }
         }
-        free(counts);
+        pa_free(counts);
         return (float)best_class;
     }
 }
@@ -103,7 +104,7 @@ static float calculateCriterion(const DecisionTree* tree, const Matrix* y, Subse
                 max_class = (int)y_data[subset->indices[i]];
         }
         
-        float* probs = (float*)calloc(max_class + 1, sizeof(float));
+        float* probs = (float*)pa_calloc(max_class + 1, sizeof(float));
         for (int i = 0; i < subset->count; i++) {
             probs[(int)y_data[subset->indices[i]]]++;
         }
@@ -117,7 +118,7 @@ static float calculateCriterion(const DecisionTree* tree, const Matrix* y, Subse
         } else {
             result = giniImpurity(probs, max_class + 1);
         }
-        free(probs);
+        pa_free(probs);
         return result;
     }
 }
@@ -125,7 +126,7 @@ static float calculateCriterion(const DecisionTree* tree, const Matrix* y, Subse
 static DecisionNode* buildTreeRecursive(const DecisionTree* tree, const Matrix* X, const Matrix* y, Subset* subset, int depth) {
     if (subset->count == 0) return NULL;
 
-    DecisionNode* node = (DecisionNode*)malloc(sizeof(DecisionNode));
+    DecisionNode* node = (DecisionNode*)pa_malloc(sizeof(DecisionNode));
     node->left = NULL;
     node->right = NULL;
     node->is_leaf = 0;
@@ -153,7 +154,7 @@ static DecisionNode* buildTreeRecursive(const DecisionTree* tree, const Matrix* 
     // Feature selection (max_features)
     int n_all_features = X->cols;
     int n_features_to_check = (tree->max_features > 0 && tree->max_features < n_all_features) ? tree->max_features : n_all_features;
-    int* feature_indices = (int*)malloc(n_all_features * sizeof(int));
+    int* feature_indices = (int*)pa_malloc(n_all_features * sizeof(int));
     for (int i = 0; i < n_all_features; i++) feature_indices[i] = i;
 
     if (n_features_to_check < n_all_features) {
@@ -173,8 +174,8 @@ static DecisionNode* buildTreeRecursive(const DecisionTree* tree, const Matrix* 
             float threshold = x_data[subset->indices[i] * X->cols + f];
             
             Subset left_sub, right_sub;
-            left_sub.indices = (int*)malloc(subset->count * sizeof(int));
-            right_sub.indices = (int*)malloc(subset->count * sizeof(int));
+            left_sub.indices = (int*)pa_malloc(subset->count * sizeof(int));
+            right_sub.indices = (int*)pa_malloc(subset->count * sizeof(int));
             left_sub.count = 0;
             right_sub.count = 0;
 
@@ -198,11 +199,11 @@ static DecisionNode* buildTreeRecursive(const DecisionTree* tree, const Matrix* 
                     best_thresh = threshold;
                 }
             }
-            free(left_sub.indices);
-            free(right_sub.indices);
+            pa_free(left_sub.indices);
+            pa_free(right_sub.indices);
         }
     }
-    free(feature_indices);
+    pa_free(feature_indices);
 
     if (best_feat == -1) {
         node->is_leaf = 1;
@@ -214,8 +215,8 @@ static DecisionNode* buildTreeRecursive(const DecisionTree* tree, const Matrix* 
 
     // Split again to recurse
     Subset left_sub, right_sub;
-    left_sub.indices = (int*)malloc(subset->count * sizeof(int));
-    right_sub.indices = (int*)malloc(subset->count * sizeof(int));
+    left_sub.indices = (int*)pa_malloc(subset->count * sizeof(int));
+    right_sub.indices = (int*)pa_malloc(subset->count * sizeof(int));
     left_sub.count = 0;
     right_sub.count = 0;
     for (int i = 0; i < subset->count; i++) {
@@ -229,8 +230,8 @@ static DecisionNode* buildTreeRecursive(const DecisionTree* tree, const Matrix* 
     node->left = buildTreeRecursive(tree, X, y, &left_sub, depth + 1);
     node->right = buildTreeRecursive(tree, X, y, &right_sub, depth + 1);
 
-    free(left_sub.indices);
-    free(right_sub.indices);
+    pa_free(left_sub.indices);
+    pa_free(right_sub.indices);
 
     return node;
 }
@@ -242,7 +243,7 @@ void trainDecisionTree(DecisionTree* tree, const Matrix* X, const Matrix* y) {
     for (int i = 0; i < full_set.count; i++) full_set.indices[i] = i;
 
     tree->root = buildTreeRecursive(tree, X, y, &full_set, 0);
-    free(full_set.indices);
+    pa_free(full_set.indices);
 }
 
 static float predictSample(const DecisionNode* node, const float* sample, int n_cols) {

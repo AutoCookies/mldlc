@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "palloc.h"
 
 /* Helper to create subset matrices from indices */
 static void createSubsets(const Matrix* X, const Matrix* y, const int* indices, int count, Matrix** subX, Matrix** suby) {
@@ -21,7 +22,7 @@ static void createSubsets(const Matrix* X, const Matrix* y, const int* indices, 
 float* cross_val_score(const Estimator* est, const Matrix* X, const Matrix* y, void* params, int cv, int shuffle, int random_state) {
     if (!est || !X || !y) return NULL;
     
-    float* scores = (float*)malloc(cv * sizeof(float));
+    float* scores = (float*)pa_malloc(cv * sizeof(float));
     int n_samples = X->rows;
 
     for (int f = 0; f < cv; f++) {
@@ -62,7 +63,7 @@ GridSearchResult grid_search(const Estimator* est, const Matrix* X, const Matrix
             result.best_params = params_grid[i];
             result.best_index = i;
         }
-        free(scores);
+        pa_free(scores);
     }
     return result;
 }

@@ -4,6 +4,7 @@
 #include "../calculations/metrics.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "palloc.h"
 
 /* --- Helper for Initialization --- */
 static void initializeWeights(Matrix* weights) {
@@ -16,7 +17,7 @@ static void initializeWeights(Matrix* weights) {
 /* --- Linear Regressor Implementation --- */
 
 LinearRegressor* createLinearRegressor(int input_size, float lr, int iter, RegularizationType reg_type, float lambda, float alpha) {
-    LinearRegressor* model = (LinearRegressor*)malloc(sizeof(LinearRegressor));
+    LinearRegressor* model = (LinearRegressor*)pa_malloc(sizeof(LinearRegressor));
     if (!model) return NULL;
     model->weights = createMatrix(input_size, 1, DTYPE_FLOAT32);
     initializeWeights(model->weights);
@@ -32,7 +33,7 @@ LinearRegressor* createLinearRegressor(int input_size, float lr, int iter, Regul
 void freeLinearRegressor(LinearRegressor* model) {
     if (model) {
         freeMatrix(model->weights);
-        free(model);
+        pa_free(model);
     }
 }
 
@@ -75,7 +76,7 @@ void trainLinearRegressor(LinearRegressor* model, const Matrix* X, const Matrix*
 /* --- Linear Classifier Implementation --- */
 
 LinearClassifier* createLinearClassifier(int input_size, float lr, int iter, RegularizationType reg_type, float lambda, float alpha) {
-    LinearClassifier* model = (LinearClassifier*)malloc(sizeof(LinearClassifier));
+    LinearClassifier* model = (LinearClassifier*)pa_malloc(sizeof(LinearClassifier));
     if (!model) return NULL;
     model->weights = createMatrix(input_size, 1, DTYPE_FLOAT32);
     initializeWeights(model->weights);
@@ -91,7 +92,7 @@ LinearClassifier* createLinearClassifier(int input_size, float lr, int iter, Reg
 void freeLinearClassifier(LinearClassifier* model) {
     if (model) {
         freeMatrix(model->weights);
-        free(model);
+        pa_free(model);
     }
 }
 

@@ -1,10 +1,10 @@
 #include "matrix.h"
-#include <stdlib.h>
+#include "palloc.h"
 #include <stdint.h>
 
 Matrix *createMatrix(int rows, int cols, DataType dtype)
 {
-    Matrix *matrix = (Matrix *)malloc(sizeof(Matrix));
+    Matrix *matrix = (Matrix *)pa_malloc(sizeof(Matrix));
     if (matrix == NULL)
         return NULL;
 
@@ -28,11 +28,11 @@ Matrix *createMatrix(int rows, int cols, DataType dtype)
         break;
     }
 
-    matrix->data = malloc(total_elements * element_size);
+    matrix->data = pa_malloc(total_elements * element_size);
 
     if (matrix->data == NULL)
     {
-        free(matrix);
+        pa_free(matrix);
         return NULL;
     }
 
@@ -100,7 +100,7 @@ void freeMatrix(Matrix *matrix)
         return;
     if (matrix->data != NULL)
     {
-        free(matrix->data);
+        pa_free(matrix->data);
     }
-    free(matrix);
+    pa_free(matrix);
 }

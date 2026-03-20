@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "palloc.h"
 #include "model_selection.h"
 #include "dataloader.h"
 #include "svm.h"

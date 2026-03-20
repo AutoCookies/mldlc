@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "palloc.h"
 
 Matrix* loadCSV(const char* filename, int has_header) {
     FILE* file = fopen(filename, "r");
@@ -12,13 +13,13 @@ Matrix* loadCSV(const char* filename, int has_header) {
     int cols = 0;
 
     if (fgets(line, sizeof(line), file)) {
-        char* tmp = strdup(line);
+        char* tmp = pa_strdup(line);
         char* token = strtok(tmp, ",");
         while (token) {
             cols++;
             token = strtok(NULL, ",");
         }
-        free(tmp);
+        pa_free(tmp);
         if (!has_header) rows++;
     }
 
@@ -62,7 +63,7 @@ void train_test_split(const Matrix* X, const Matrix* y, float test_size, int shu
     *y_train = createMatrix(n_train, y->cols, y->dtype);
     *y_test = createMatrix(n_test, y->cols, y->dtype);
 
-    int* indices = (int*)malloc(n_samples * sizeof(int));
+    int* indices = (int*)pa_malloc(n_samples * sizeof(int));
     for (int i = 0; i < n_samples; i++) indices[i] = i;
 
     if (shuffle) {
@@ -90,14 +91,14 @@ void train_test_split(const Matrix* X, const Matrix* y, float test_size, int shu
         memcpy((float*)(*y_test)->data + i * y->cols, (float*)y->data + idx * y->cols, target_size);
     }
 
-    free(indices);
+    pa_free(indices);
 }
 
 KFoldSplit* get_k_fold_indices(int n_samples, int k, int fold_idx, int shuffle, int random_state) {
     if (fold_idx < 0 || fold_idx >= k) return NULL;
 
-    KFoldSplit* split = (KFoldSplit*)malloc(sizeof(KFoldSplit));
-    int* indices = (int*)malloc(n_samples * sizeof(int));
+    KFoldSplit* split = (KFoldSplit*)pa_malloc(sizeof(KFoldSplit));
+    int* indices = (int*)pa_malloc(n_samples * sizeof(int));
     for (int i = 0; i < n_samples; i++) indices[i] = i;
 
     if (shuffle) {
@@ -116,8 +117,8 @@ KFoldSplit* get_k_fold_indices(int n_samples, int k, int fold_idx, int shuffle, 
     
     split->val_count = val_end - val_start;
     split->train_count = n_samples - split->val_count;
-    split->val_indices = (int*)malloc(split->val_count * sizeof(int));
-    split->train_indices = (int*)malloc(split->train_count * sizeof(int));
+    split->val_indices = (int*)pa_malloc(split->val_count * sizeof(int));
+    split->train_indices = (int*)pa_malloc(split->train_count * sizeof(int));
 
     int val_ptr = 0, train_ptr = 0;
     for (int i = 0; i < n_samples; i++) {
@@ -128,7 +129,7 @@ KFoldSplit* get_k_fold_indices(int n_samples, int k, int fold_idx, int shuffle, 
         }
     }
 
-    free(indices);
+    pa_free(indices);
     return split;
 }
 

@@ -1,9 +1,10 @@
 #include "svm.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "palloc.h"
 
 SVM* createSVM(int input_size, float C, float lr, int iter) {
-    SVM* model = (SVM*)malloc(sizeof(SVM));
+    SVM* model = (SVM*)pa_malloc(sizeof(SVM));
     if (model == NULL) return NULL;
 
     model->weights = createMatrix(input_size, 1, DTYPE_FLOAT32);
@@ -77,5 +78,5 @@ Matrix* predictSVM(const SVM* model, const Matrix* X) {
 void freeSVM(SVM* model) {
     if (model == NULL) return;
     freeMatrix(model->weights);
-    free(model);
+    pa_free(model);
 }

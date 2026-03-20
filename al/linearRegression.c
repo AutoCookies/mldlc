@@ -3,14 +3,15 @@
 #include "../calculations/metrics.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "palloc.h"
 
 LinearRegression* createLinearRegression(int input_size, float lr, int iter, RegularizationType reg_type, float lambda, float alpha) {
-    LinearRegression* model = (LinearRegression*)malloc(sizeof(LinearRegression));
+    LinearRegression* model = (LinearRegression*)pa_malloc(sizeof(LinearRegression));
     if (model == NULL) return NULL;
 
     model->weights = createMatrix(input_size, 1, DTYPE_FLOAT32);
     if (model->weights == NULL) {
-        free(model);
+        pa_free(model);
         return NULL;
     }
 
@@ -32,7 +33,7 @@ LinearRegression* createLinearRegression(int input_size, float lr, int iter, Reg
 void freeLinearRegression(LinearRegression* model) {
     if (model == NULL) return;
     if (model->weights != NULL) freeMatrix(model->weights);
-    free(model);
+    pa_free(model);
 }
 
 Matrix* predictLinearRegression(const LinearRegression* model, const Matrix* X) {

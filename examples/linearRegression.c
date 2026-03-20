@@ -24,7 +24,7 @@ void testSimpleLinearRegression() {
     // 2. Initialize Model
     float learning_rate = 0.01f;
     int iterations = 1000;
-    LinearRegression* model = createLinearRegression(n_features, learning_rate, iterations);
+    LinearRegression* model = createLinearRegression(n_features, learning_rate, iterations, REG_NONE, 0.0f, 0.0f);
     
     // 3. Train Model
     printf("Training model for %d iterations...\n", iterations);
@@ -81,7 +81,7 @@ void testMultipleLinearRegression() {
     // 2. Initialize Model
     float learning_rate = 0.01f;
     int iterations = 2000; // More features might need more iterations
-    LinearRegression* model = createLinearRegression(n_features, learning_rate, iterations);
+    LinearRegression* model = createLinearRegression(n_features, learning_rate, iterations, REG_NONE, 0.0f, 0.0f);
 
     // 3. Train Model
     printf("Training model for %d iterations...\n", iterations);

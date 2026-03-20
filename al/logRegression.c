@@ -4,14 +4,15 @@
 #include "../calculations/metrics.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "palloc.h"
 
 LogisticRegression* createLogisticRegression(int input_size, float lr, int iter, RegularizationType reg_type, float lambda, float alpha) {
-    LogisticRegression* model = (LogisticRegression*)malloc(sizeof(LogisticRegression));
+    LogisticRegression* model = (LogisticRegression*)pa_malloc(sizeof(LogisticRegression));
     if (model == NULL) return NULL;
 
     model->weights = createMatrix(input_size, 1, DTYPE_FLOAT32);
     if (model->weights == NULL) {
-        free(model);
+        pa_free(model);
         return NULL;
     }
 
@@ -33,7 +34,7 @@ LogisticRegression* createLogisticRegression(int input_size, float lr, int iter,
 void freeLogisticRegression(LogisticRegression* model) {
     if (model == NULL) return;
     if (model->weights != NULL) freeMatrix(model->weights);
-    free(model);
+    pa_free(model);
 }
 
 Matrix* predictLogisticRegression(const LogisticRegression* model, const Matrix* X) {
